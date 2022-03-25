@@ -1,4 +1,7 @@
-﻿create table "public"."salesforcasting" (
+﻿---
+
+create
+or replace table "public"."salesforcasting" (
   "base_year_code" smallint not null,
   "base_quarterly_code" tinyint not null,
   "business_district_division_code" text(1) not null,
@@ -81,13 +84,19 @@
   "number_of_stores" smallint not null
 );
 
+---
+
 select
   *
 from
   salesforasting;
 
+---
+
 select
   get_ddl('public.salesforcasting');
+
+---
 
 copy public.salesforcasting
 from
@@ -100,10 +109,14 @@ from
     error_log = 'input_error.log'
   );
 
+---
+
 select
   *
 from
   salesforcasting;
+
+---Table on SQream Internal
 
 select
   base_year_code,
@@ -116,32 +129,72 @@ group by
 order by
   base_year_code desc;
 
+---Table on SQream External
+
+select
+  count(*)
+from
+  salesforcasting_foreign;
+
+---386,783,150
+
+select
+  base_year_code,
+  sum(quarterly_sales_amount),
+  avg(quarterly_sales_amount)
+from
+  salesforcasting_foreign
+group by
+  base_year_code
+order by
+  base_year_code desc;
+
+----  
+
 select
   show_version();
+
+---
 
 select
   show_cluster_nodes();
 
+---
+
 select
   get_license_info();
+
+---
 
 select
   show_subscribed_instances();
 
+---
+
 select
   show_connections();
+
+---
 
 select
   list_utility_functions();
 
+---
+
 select
   show_server_status();
+
+---
 
 select
   show_locks();
 
+---
+
 select
   show_db_info('seoulsmallbiz');
+
+---
 
 ---get statement_id
 
@@ -153,27 +206,43 @@ select
 select
   show_node_info(4779);
 
+---
+
 select
   show_server_status();
+
+---
 
 select
   stop_statement(5228);
 
+---
+
 select
   show_connections();
+
+---
 
 select
   connection_stop_statement(3988);
 
+---
+
 ---에러발생, 메뉴얼에도 안나옴(2022/03/21)
 
 select
-  data_diag(1, '/sqreamdb/sqream_storage/databases/seoulsmallbiz/tables/6/0/0-9997');
+  data_diag(1, 'seoulsmallbiz', 'public.salesforcasting');
+
+---
 
 select
   data_diag(12, '/sqreamdb/sqream_storage/databases/seoulsmallbiz/tables/6/0/0-9997');
 
+---
+
 --can not remove key, file exists, data_diag()는 SQream문서파일에 검색이 않됨
+
+---
 
 select
   *
@@ -182,62 +251,98 @@ from
 where
   table_name = 'salesforcasting';
 
+---
+
 select
   1
 from
   public.salesforcasting;
 
+---
+
 select
   1;
+
+---
 
 select
   count(*)
 from
   sqream_catalog.md_deleted_files;
 
+---
+
 select
   export_leveldb_stats('/tmp/mkbahk_exports_leveldb_states.txt');
+
+---
 
 select
   reset_leveldb_stats();
 
+---
+
 select
   export_statement_queue_stats('/tmp/mkbahk_export_statement_queue_stats.txt');
+
+---
 
 select
   get_open_snapshots_statements('/tmp/mkbahk_opensnapshot_stats.txt');
 
+---
+
 select
   get_statement_locks('select base_year_code, sum(quarterly_sales_amount), avg(quarterly_sales_amount) from salesforcasting group by base_year_code order by base_year_code desc');
+
+---
 
 select
   count(*)
 from
   sqream_catalog.chunks;
 
+---
+
 select
   get_license_info();
+
+---
 
 select
   show_server_status();
 
+---
+
 select
   show_instance_services('worker_5001');
+
+---
 
 select
   key_evaluate('view_light', 'seoulsmallbiz', 'public.salesforcasting');
 
+---
+
 select
   show_version();
+
+---
 
 select
   data_diag(1, 'seoulsmallbiz', 'public.salesforcasting');
 
+---
+
 select
   data_diag(12, '/sqreamdb/sqream_storage/databases/seoulsmallbiz/tables/6/0/0-9995');
 
+---
+
 select
   rows_count_correction('public', 'salesforcasting', 'correct');
+
+---
 
 select
   cleanup_chunks('public', 'salesforcasting');
@@ -254,16 +359,20 @@ where
 ---783960
 
 select
-  cleanup_extents('public', 'salesforcasting');
+  count(*)
+from
+  salesforcasting
+where
+  base_year_code = 2014;
 
----Error executing statement: Can not execute cleanup_extents on table because there are mixed chunks. Please execute cleanup_chunks and try again.
+---
 
-select
-  rows_count_correction('public', 'salesforcasting', 'correct');
+delete from
+  salesforcasting
+where
+  base_year_code = 2020;
 
----delete가 일어났는데 아직 클린업되지 않는 테이블 찾기
-
----List tables that haven’t been cleaned up
+---
 
 SELECT
   t.table_name
@@ -276,7 +385,7 @@ GROUP BY
 ---Identify predicates for clean-up
 
 SELECT
-  delete_predicate
+  *
 FROM
   sqream_catalog.delete_predicates dp
   JOIN sqream_catalog.tables t ON dp.table_id = t.table_id
