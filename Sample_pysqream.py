@@ -17,8 +17,8 @@ Connection parameters include:
 con = pysqream.connect( host='127.0.0.1'
 			, port=3108
 			, database='humanresources'
-                   	, username='sqream'
-			, password='sqream'
+                   	, username='ChangeMe'
+			, password='ChangeMe'
                    	, clustered=True )
 
 # Create a new cursor
